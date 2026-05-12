@@ -25,7 +25,9 @@ class Grid:
             rendered_row = []
             for cell in row:
                 color = self.COLOR_MAP.get(cell)
-                if color:
+                if cell == None:
+                        rendered = ' '
+                elif color:
                     rendered = colored(str(cell), color)
                 else:
                     rendered = str(cell)
@@ -44,14 +46,30 @@ class Grid:
     def gen_blank_grid(self, rows, cols):
         res = []
         for _ in range(rows):
-            res.append([' '] * cols) 
+            res.append([None] * cols) 
         return res
     
     def get_cell(self, pos):
+        self.check_xy_bounds(pos[0], pos[1])
         return self.grid[pos[1]][pos[0]]
     
-    def draw_cell(self, cell):
-        self.grid[cell[1]][cell[0]] = cell[2]
+    def get_all_cells(self, empty=False):
+        cells = []
+        for y in range(self.rows):
+            for x in range(self.cols):
+                symb = self.grid[y][x]
+                if empty or symb is not None:
+                    cells.append((x, y, symb))
+        return cells
+    
+    def check_xy_bounds(self, x, y):
+        if not (0 <= x < self.cols and 0 <= y < self.rows):
+            raise ValueError(f"x:{x}, y:{y} is out of bounds")
+    
+    def draw_cells(self, *cells):
+        for cell in cells:
+            self.check_xy_bounds(cell[0], cell[1])
+            self.grid[cell[1]][cell[0]] = cell[2]
         return self
     
     def clear(self):
@@ -60,13 +78,6 @@ class Grid:
     
     def redraw_frame(self, cells):
         self.clear()
-        for cell in cells:
-            y = cell[1]
-            x = cell[0]
-            symb = cell[2]
-            try:
-                self.grid[y][x] = symb
-            except IndexError as e:
-                raise IndexError(f"Cell ({x}, {y}) is out of bounds")
+        self.draw_cells(*cells)
         return self
         
