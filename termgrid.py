@@ -1,10 +1,23 @@
 from termcolor import colored
 import shutil
 
+class Cell:
+    def __init__(self, x, y, symb=None):
+        self.x = x
+        self.y = y
+        self.symb = symb
+    
+    def __str__(self):
+        return f"{self.symb} at ({self.x}, {self.y})"
+    
+
 class Grid:
     COLOR_MAP = {
         0: "green",
-        1: "red",
+        1: "black",
+        2: "yellow",
+        3: "blue",
+        4: "light_yellow",
     }
 
     def __init__(self, rows=80, cols=40, mode="fit"):
@@ -25,7 +38,7 @@ class Grid:
             rendered_row = []
             for cell in row:
                 color = self.COLOR_MAP.get(cell)
-                if cell == None:
+                if cell is None:
                         rendered = ' '
                 elif color:
                     rendered = colored(str(cell), color)
@@ -35,6 +48,9 @@ class Grid:
             lines.append("".join(rendered_row))
             #TODO: ADD SPACE BETWEEN LETTERS AS CHOICE
         return "\n".join(lines)
+
+    def show_size(self):
+        print(f"Lines: {self.rows}\nColumns: {self.cols}")
 
     @staticmethod
     def are_positive_ints(*values):
@@ -59,17 +75,17 @@ class Grid:
             for x in range(self.cols):
                 symb = self.grid[y][x]
                 if empty or symb is not None:
-                    cells.append((x, y, symb))
+                    cells.append(Cell(x, y, symb))
         return cells
     
-    def check_xy_bounds(self, x, y):
-        if not (0 <= x < self.cols and 0 <= y < self.rows):
-            raise ValueError(f"x:{x}, y:{y} is out of bounds")
+    def check_xy_bounds(self, cell):
+        if not (0 <= cell.x < self.cols and 0 <= cell.y < self.rows):
+            raise ValueError(f"x:{cell.x}, y:{cell.y} is out of bounds")
     
     def draw_cells(self, *cells):
         for cell in cells:
-            self.check_xy_bounds(cell[0], cell[1])
-            self.grid[cell[1]][cell[0]] = cell[2]
+            self.check_xy_bounds(cell)
+            self.grid[cell.y][cell.x] = cell.symb
         return self
     
     def clear(self):
@@ -80,4 +96,3 @@ class Grid:
         self.clear()
         self.draw_cells(*cells)
         return self
-        
