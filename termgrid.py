@@ -33,13 +33,8 @@ class Grid:
         elif mode == "custom":
             self.cols = cols
             self.rows = rows
-
-        if grid == None:
-            self.grid = self.gen_blank_grid(self.rows, self.cols)
-        else:
-            self.grid = grid
-
-        self.cell_map = self.gen_cell_map(self.grid)
+        
+        self.cell_map = self.gen_cell_map(self.rows, self.cols, self.grid)
 
     def __str__(self): #TODO
         lines = []
@@ -76,37 +71,49 @@ class Grid:
         return res
     
     def get_cell(self, x, y):
-        self.check_xy_bounds(x, y)
-        return self.grid[y][x]
+        cell = self.cell_map.get((x, y), None)
+        if cell:
+            return self.cell_map[(x, y)]
+        raise ValueError(f"x:{cell.x}, y:{cell.y} is out of bounds")
     
+    def check_xy_bounds(self, cell):
+        cell = self.cell_map.get((cell.x, cell.y), None)
+        if not cell:
+            raise ValueError(f"x:{cell.x}, y:{cell.y} is out of bounds")
+
+
     def get_all_cells(self, empty=True):
         cells = []
         for y in range(self.rows):
             for x in range(self.cols):
-                symb = self.grid[y][x]
-                if empty or symb is not None:
-                    cells.append(Cell(x, y, symb))
+                cell = self.cell_map[(x, y)]
+                if empty == True or cell.symb != None:
+                    cells.append(cell)
         return cells
-    
-    def check_xy_bounds(self, cell):
-        if not (0 <= cell.x < self.cols and 0 <= cell.y < self.rows):
-            raise ValueError(f"x:{cell.x}, y:{cell.y} is out of bounds")
     
     def draw_cells(self, *cells):
         for cell in cells:
             self.check_xy_bounds(cell)
-            self.grid[cell.y][cell.x] = cell.symb
+            self.cell_map[(cell.x, cell.y)] = cell.symb
         return self
     
     def clear(self):
-        self.grid = self.gen_blank_grid(self.rows, self.cols)
+        self.cell_map = self.gen_cell_map(self.rows, self.cols, None)
         return self
     
-    def redraw_frame(self, cells):
+    def redraw_frame(self, cell_map):
         self.clear()
-        self.draw_cells(*cells)
+        self.cell_map = self.gen_cell_map(0, 0, cell_map)
         return self
     
-    def gen_cell_map(self, grid):
-        ...
+    def gen_cell_map(self, rows, cols, grid=None):
+        if grid != None:
+            return grid
+        
+        cell_map = {}
+        for y in range(rows):
+            for x in range(cols):
+                cell_map[(x, y)] = Cell(x, y, None)
+
+        return cell_map
         
