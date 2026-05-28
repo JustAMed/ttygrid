@@ -9,18 +9,21 @@ class Cell:
     
     def __str__(self):
         return f"{self.symb} at ({self.x}, {self.y})"
+
     
+# Y = rows
+# X = cols
 
 class Grid:
     COLOR_MAP = {
-        0: "green",
-        1: "black",
-        2: "yellow",
-        3: "blue",
-        4: "light_yellow",
+        '0': "green",
+        '1': "black",
+        '2': "yellow",
+        '3': "blue",
+        '4': "light_yellow",
     }
 
-    def __init__(self, rows=80, cols=40, mode="fit"):
+    def __init__(self, rows=80, cols=40, mode="fit", color_map=COLOR_MAP, grid=None):
         if mode not in ['fit', 'custom']:
             raise ValueError(f"Mode must be 'custom' or 'fit', '{mode}' is not a valid mode")
         if not self.are_positive_ints(rows, cols):
@@ -30,9 +33,15 @@ class Grid:
         elif mode == "custom":
             self.cols = cols
             self.rows = rows
-        self.grid = self.gen_blank_grid(self.rows, self.cols)
 
-    def __str__(self):
+        if grid == None:
+            self.grid = self.gen_blank_grid(self.rows, self.cols)
+        else:
+            self.grid = grid
+
+        self.cell_map = self.gen_cell_map(self.grid)
+
+    def __str__(self): #TODO
         lines = []
         for row in self.grid:
             rendered_row = []
@@ -61,15 +70,16 @@ class Grid:
 
     def gen_blank_grid(self, rows, cols):
         res = []
-        for _ in range(rows):
-            res.append([None] * cols) 
+        for y in range(rows):
+            for x in range(cols):
+                res.append(Cell(x, y, None))
         return res
     
-    def get_cell(self, pos):
-        self.check_xy_bounds(pos[0], pos[1])
-        return self.grid[pos[1]][pos[0]]
+    def get_cell(self, x, y):
+        self.check_xy_bounds(x, y)
+        return self.grid[y][x]
     
-    def get_all_cells(self, empty=False):
+    def get_all_cells(self, empty=True):
         cells = []
         for y in range(self.rows):
             for x in range(self.cols):
@@ -96,3 +106,7 @@ class Grid:
         self.clear()
         self.draw_cells(*cells)
         return self
+    
+    def gen_cell_map(self, grid):
+        ...
+        

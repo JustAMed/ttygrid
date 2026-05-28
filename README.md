@@ -2,7 +2,8 @@
 Termgrid is a WIP grid based system for terminal-based grid simulations.
 
 ## Features
-- Centralized cell structure (x, y, symbol)
+- Grid class and cell class
+- Functions to get and set cells
 - Inbuilt coloring for different symbols using termcolor
 - Auto adjust to terminal size
 
