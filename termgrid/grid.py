@@ -23,7 +23,7 @@ class Grid:
         '4': "light_yellow",
     }
 
-    def __init__(self, rows=80, cols=40, mode="fit", color_map=COLOR_MAP, grid=None):
+    def __init__(self, rows=80, cols=40, mode="fit", grid=None):
         if mode not in ['fit', 'custom']:
             raise ValueError(f"Mode must be 'custom' or 'fit', '{mode}' is not a valid mode")
         if not self.are_positive_ints(rows, cols):
@@ -34,27 +34,32 @@ class Grid:
             self.cols = cols
             self.rows = rows
         
-        self.cell_map = self.gen_cell_map(self.rows, self.cols, self.grid)
+        self.cell_map = self.gen_cell_map(self.rows, self.cols, grid)
+
+    def get_color(self, symb):
+        return self.COLOR_MAP.get(symb)
 
     def __str__(self): #TODO
         lines = []
-        for row in self.grid:
-            rendered_row = []
-            for cell in row:
-                color = self.COLOR_MAP.get(cell)
-                if cell is None:
-                        rendered = ' '
-                elif color:
-                    rendered = colored(str(cell), color)
+        for y in range(self.rows):
+            line = []
+            for x in range(self.cols):
+                cell = self.cell_map[(x, y)]
+                color = self.get_color(cell.symb)
+                if color:
+                    line.append(colored(cell.symb, color))
                 else:
-                    rendered = str(cell)
-                rendered_row.append(rendered)
-            lines.append("".join(rendered_row))
-            #TODO: ADD SPACE BETWEEN LETTERS AS CHOICE
+                    line.append(cell.symb or " ")
+            lines.append("".join(line))
         return "\n".join(lines)
+                                
 
     def show_size(self):
         print(f"Lines: {self.rows}\nColumns: {self.cols}")
+
+    @staticmethod
+    def clear_term():
+        print("\033[H\033[J", end="")
 
     @staticmethod
     def are_positive_ints(*values):
@@ -63,38 +68,28 @@ class Grid:
                 return False
         return True        
 
-    def gen_blank_grid(self, rows, cols):
-        res = []
-        for y in range(rows):
-            for x in range(cols):
-                res.append(Cell(x, y, None))
-        return res
-    
     def get_cell(self, x, y):
-        cell = self.cell_map.get((x, y), None)
-        if cell:
-            return self.cell_map[(x, y)]
-        raise ValueError(f"x:{cell.x}, y:{cell.y} is out of bounds")
+        if (x, y) not in self.cell_map:
+            raise ValueError(f"x:{x}, y:{y} is out of bounds")
+        return self.cell_map[(x, y)]
     
-    def check_xy_bounds(self, cell):
-        cell = self.cell_map.get((cell.x, cell.y), None)
-        if not cell:
+    def validate_cell(self, cell):
+        if (cell.x, cell.y) not in self.cell_map:
             raise ValueError(f"x:{cell.x}, y:{cell.y} is out of bounds")
-
 
     def get_all_cells(self, empty=True):
         cells = []
         for y in range(self.rows):
             for x in range(self.cols):
                 cell = self.cell_map[(x, y)]
-                if empty == True or cell.symb != None:
+                if empty or cell.symb is not None:
                     cells.append(cell)
         return cells
     
     def draw_cells(self, *cells):
         for cell in cells:
-            self.check_xy_bounds(cell)
-            self.cell_map[(cell.x, cell.y)] = cell.symb
+            self.validate_cell(cell)
+            self.cell_map[(cell.x, cell.y)] = cell
         return self
     
     def clear(self):
@@ -102,12 +97,11 @@ class Grid:
         return self
     
     def redraw_frame(self, cell_map):
-        self.clear()
-        self.cell_map = self.gen_cell_map(0, 0, cell_map)
+        self.cell_map = cell_map
         return self
     
     def gen_cell_map(self, rows, cols, grid=None):
-        if grid != None:
+        if grid is not None:
             return grid
         
         cell_map = {}
@@ -116,4 +110,3 @@ class Grid:
                 cell_map[(x, y)] = Cell(x, y, None)
 
         return cell_map
-        

@@ -9,8 +9,9 @@ def main():
     while True:
         cells = grid.get_all_cells(empty=True)
         for cell in cells:
-            cell.symb = random.choice([0, 1])
+            cell.symb = random.choice(['0', '1'])
             grid.draw_cells(cell)
+        grid.clear_term()
         print(grid)
         time.sleep(0.1)
 
