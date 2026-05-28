@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: ttygrid
+Version: 0.1.0
+Summary: Simple terminal grid rendering library
+Author: JustMedansh
+License: MIT
+Requires-Python: >=3.8
+License-File: LICENSE
+Requires-Dist: termcolor
+Dynamic: license-file

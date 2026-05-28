@@ -1,8 +1,8 @@
 import random
 import os
 import time
-from termgrid import Cell, Grid
 from termcolor import colored
+from ttygrid import Grid, Cell
 
 def main():
     grid = Grid()
